@@ -115,9 +115,9 @@ public class FinanceView extends VerticalLayout {
     private HorizontalLayout buildSummaryCards() {
         HorizontalLayout summary = new HorizontalLayout(
                 createSummaryCard("Total Transaksi", totalCount, "#DBEAFE", "#1D4ED8", "#1E40AF"),
-                createSummaryCard("Total Pemasukan", incomeTotal, "#DCFCE7", "#16A34A", "#166534"),
-                createSummaryCard("Total Pengeluaran", expenseTotal, "#FEE2E2", "#DC2626", "#991B1B"),
-                createSummaryCard("Saldo", balanceTotal, "#FEF3C7", "#D97706", "#92400E")
+                createSummaryCard("Total Pemasukan", incomeTotal, "#DCFCE7", "#166534", "#166534"),
+                createSummaryCard("Total Pengeluaran", expenseTotal, "#FEE2E2", "#991B1B", "#991B1B"),
+                createSummaryCard("Saldo", balanceTotal, "#FEF3C7", "#92400E", "#92400E")
         );
         summary.setWidthFull();
         summary.setSpacing(true);

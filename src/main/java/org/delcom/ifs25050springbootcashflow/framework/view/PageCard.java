@@ -51,6 +51,7 @@ final class PageCard {
                 .set("padding", "1rem 1.1rem")
                 .set("box-shadow", "0 8px 24px rgba(15, 23, 42, 0.06)")
                 .set("box-sizing", "border-box");
+        card.getElement().setAttribute("role", "main");
         return card;
     }
 }
