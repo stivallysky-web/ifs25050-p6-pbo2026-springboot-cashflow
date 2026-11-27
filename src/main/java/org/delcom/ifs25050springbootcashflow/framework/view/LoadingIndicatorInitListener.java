@@ -16,6 +16,13 @@ public class LoadingIndicatorInitListener implements VaadinServiceInitListener {
 
     @Override
     public void serviceInit(ServiceInitEvent event) {
+        event.addIndexHtmlRequestListener(response ->
+                response.getDocument().head()
+                        .appendElement("meta")
+                        .attr("name", "description")
+                        .attr("content", "Aplikasi Cash Flow untuk mencatat pemasukan, pengeluaran, dan ringkasan keuangan secara terstruktur.")
+        );
+
         event.getSource().addUIInitListener(uiEvent -> {
             LoadingIndicatorConfiguration conf = uiEvent.getUI().getLoadingIndicatorConfiguration();
             conf.setApplyDefaultTheme(true);
