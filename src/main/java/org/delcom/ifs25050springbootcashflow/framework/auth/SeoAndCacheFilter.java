@@ -32,38 +32,12 @@ public class SeoAndCacheFilter implements Filter {
 
         String path = req.getRequestURI();
         if ("/robots.txt".equals(path)) {
-            byte[] body = "User-agent: *\nAllow: /\n".getBytes(StandardCharsets.UTF_8);
-            res.setStatus(HttpServletResponse.SC_OK);
-            res.setContentType("text/plain; charset=UTF-8");
-            res.setContentLength(body.length);
-            res.getOutputStream().write(body);
+            writeRobotsTxt(res);
             return;
         }
 
         if (isCacheableAsset(path)) {
-            HttpServletResponse wrapped = new HttpServletResponseWrapper(res) {
-                @Override
-                public void setHeader(String name, String value) {
-                    if (shouldOverrideCacheHeader(name)) {
-                        super.setHeader(CACHE_CONTROL_HEADER, CACHE_HEADER_VALUE);
-                        return;
-                    }
-                    if (!isLegacyCacheHeader(name)) {
-                        super.setHeader(name, value);
-                    }
-                }
-
-                @Override
-                public void addHeader(String name, String value) {
-                    if (shouldOverrideCacheHeader(name)) {
-                        super.setHeader(CACHE_CONTROL_HEADER, CACHE_HEADER_VALUE);
-                        return;
-                    }
-                    if (!isLegacyCacheHeader(name)) {
-                        super.addHeader(name, value);
-                    }
-                }
-            };
+            HttpServletResponse wrapped = wrapCacheResponse(res);
             wrapped.setHeader(CACHE_CONTROL_HEADER, CACHE_HEADER_VALUE);
             chain.doFilter(request, wrapped);
             return;
@@ -72,19 +46,53 @@ public class SeoAndCacheFilter implements Filter {
         chain.doFilter(request, response);
     }
 
-    private boolean shouldOverrideCacheHeader(String name) {
+    private static void writeRobotsTxt(HttpServletResponse res) throws IOException {
+        byte[] body = "User-agent: *\nAllow: /\n".getBytes(StandardCharsets.UTF_8);
+        res.setStatus(HttpServletResponse.SC_OK);
+        res.setContentType("text/plain; charset=UTF-8");
+        res.setContentLength(body.length);
+        res.getOutputStream().write(body);
+    }
+
+    private static HttpServletResponse wrapCacheResponse(HttpServletResponse res) {
+        return new HttpServletResponseWrapper(res) {
+            @Override
+            public void setHeader(String name, String value) {
+                if (shouldOverrideCacheHeader(name)) {
+                    super.setHeader(CACHE_CONTROL_HEADER, CACHE_HEADER_VALUE);
+                    return;
+                }
+                if (!isLegacyCacheHeader(name)) {
+                    super.setHeader(name, value);
+                }
+            }
+
+            @Override
+            public void addHeader(String name, String value) {
+                if (shouldOverrideCacheHeader(name)) {
+                    super.setHeader(CACHE_CONTROL_HEADER, CACHE_HEADER_VALUE);
+                    return;
+                }
+                if (!isLegacyCacheHeader(name)) {
+                    super.addHeader(name, value);
+                }
+            }
+        };
+    }
+
+    private static boolean shouldOverrideCacheHeader(String name) {
         return CACHE_CONTROL_HEADER.equalsIgnoreCase(name);
     }
 
-    private boolean isLegacyCacheHeader(String name) {
+    private static boolean isLegacyCacheHeader(String name) {
         return "Pragma".equalsIgnoreCase(name) || "Expires".equalsIgnoreCase(name);
     }
 
-    private boolean isCacheableAsset(String path) {
-        return path.startsWith("/VAADIN/")
+    private static boolean isCacheableAsset(String path) {
+        return path != null && (path.startsWith("/VAADIN/")
                 || path.startsWith("/lumo/")
                 || path.startsWith("/aura/")
                 || path.startsWith("/icons/")
-                || "/styles.css".equals(path);
+                || "/styles.css".equals(path));
     }
 }
